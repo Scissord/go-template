@@ -20,10 +20,12 @@ func Run() error {
 	if err != nil {
 		return fmt.Errorf("db connection error: %w", err)
 	}
+	// close database connection after Run() func ended
 	defer database.Close()
 
 	router := myhttp.NewRouter(database)
 
 	log.Printf("🚀 Server running on port %s", cfg.Port)
 	return http.ListenAndServe(":"+cfg.Port, router)
+	// if everything ok Run() return nil
 }

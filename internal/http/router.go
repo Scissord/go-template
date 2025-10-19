@@ -20,7 +20,7 @@ func NewRouter(db *sql.DB) *mux.Router {
 	handler := clientHandler.NewHandler(service)
 	clientHandler.RegisterRoutes(r, handler)
 
-	// healthcheck
+	// health-check
 	r.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("pong"))
 	}).Methods("GET")

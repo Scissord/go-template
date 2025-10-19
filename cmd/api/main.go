@@ -6,6 +6,9 @@ import (
 )
 
 func main() {
+	// nil != nil?
+	// no nil == nil
+	// => no error
 	if err := internal.Run(); err != nil {
 		log.Fatal(err)
 	}
