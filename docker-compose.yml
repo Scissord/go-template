@@ -1,0 +1,33 @@
+services:
+  app:
+    build: .
+    container_name: go-template
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - go-net
+
+  db:
+    image: postgres:17
+    container_name: go-db
+    env_file:
+      - .env
+    ports:
+      - "5437:5432"
+    volumes:
+      - go-db:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - go-net
+
+networks:
+  go-net:
+    driver: bridge
+
+volumes:
+  go-db:
