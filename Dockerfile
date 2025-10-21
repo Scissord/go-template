@@ -1,26 +1,26 @@
 # ==========================
-# 1️⃣ Этап сборки
+# 1️⃣ Build stage
 # ==========================
 FROM golang:1.25.1 AS builder
 
 WORKDIR /app
 
-# Копируем go.mod и go.sum
+# Copying go.mod и go.sum
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Копируем исходники
+# Copying app
 COPY . .
 
-# Устанавливаем утилиту migrate (для работы с миграциями)
+# Install migrate for migrations
 RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
-# Собираем бинарник
+# Create binary file
 RUN go build -o main ./cmd/api
 
 
 # ==========================
-# 2️⃣ Этап запуска
+# 2️⃣ Start stage
 # ==========================
 FROM debian:bookworm-slim
 
@@ -28,12 +28,12 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
-# Копируем бинарники
+# Copy binaries
 COPY --from=builder /go/bin/migrate /usr/local/bin/migrate
 COPY --from=builder /app/main .
 COPY .env .env
 
-# ⚙️ добавляем миграции в контейнер
+# Copying migrations in containers
 COPY internal/db/migrations ./migrations
 
 EXPOSE 8080
