@@ -1,10 +1,10 @@
-package client
+package product
 
 import (
 	"encoding/json"
 	"net/http"
 
-	service "go-template/internal/service/client"
+	service "go-template/internal/service/product"
 )
 
 // Handler содержит бизнес-логику HTTP-запросов

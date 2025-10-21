@@ -5,12 +5,12 @@
 # ==========================
 
 build: ## Собрать контейнер
-	@echo "🏗️  Building containers..."
-	docker compose build
+	@echo "🔨 Building..."
+	docker compose build --no-cache
 
 run: ## Запустить приложение
-	@echo "🚀 Starting containers..."
-	docker compose up
+	@echo "🚀 Running app..."
+	docker compose up --build
 
 down: ## Остановить и удалить контейнеры
 	@echo "🧹 Stopping and removing containers..."
@@ -26,21 +26,24 @@ logs: ## Посмотреть логи приложения
 # Для работы нужно, чтобы в контейнере app был установлен migrate (или другая утилита)
 # Пример: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
+DB_URL = postgres://postgres:322434@db:5432/go?sslmode=disable
+MIGRATIONS_PATH = internal/db/migrations
+
 migrate-up: ## Применить все новые миграции
 	@echo "📈 Applying migrations..."
-	docker compose exec app migrate -path /app/migrations -database "postgres://postgres:322434@db:5432/go?sslmode=disable" up
+	docker compose exec app migrate -path /app/migrations -database "$(DB_URL)" up
 
 migrate-down: ## Откатить последнюю миграцию
 	@echo "📉 Rolling back last migration..."
-	docker compose exec app migrate -path /app/migrations -database "postgres://postgres:322434@db:5432/go?sslmode=disable" down 1
+	docker compose exec app migrate -path /app/migrations -database "$(DB_URL)" down 1
 
-migrate-create: ## Создать новую миграцию (пример: make migrate-create name=create_users_table)
-	@if [ -z "$(name)" ]; then \
-		echo "❌ Укажи имя миграции: make migrate-create name=users_table"; \
-	else \
-		echo "🆕 Creating migration '$(name)'..."; \
-		docker compose exec app migrate create -ext sql -dir /app/migrations -seq $(name); \
-	fi
+migrate-create: ## Создать новую миграцию
+ifeq ($(strip $(name)),)
+	@echo "❌ Укажи имя миграции: make migrate-create name=users_table"
+else
+	@echo "🆕 Creating migration '$(name)'..."
+	migrate create -ext sql -dir $(MIGRATIONS_PATH) $(name)
+endif
 
 # ==========================
 # 📘 Help
